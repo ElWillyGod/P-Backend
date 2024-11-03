@@ -1,5 +1,6 @@
 ﻿using Core;
 using Core.Interfaces;
+using BCrypt.Net;
 
 namespace Services
 {
@@ -14,6 +15,7 @@ namespace Services
 
         public async Task<User> CreateUser(User user)
         {
+            user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
             return await _userRepository.CreateUser(user);
         }
 
@@ -35,6 +37,17 @@ namespace Services
         public async Task<bool> UpdateUser(User user)
         {
             return await _userRepository.UpdateUser(user);
+        }
+
+        public async Task<User> Authenticate(string email, string password)
+        {
+             var user = await _userRepository.GetUserByEmail(email);
+            if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
+            {
+               return user;
+            }
+
+            return null;
         }
 
     }

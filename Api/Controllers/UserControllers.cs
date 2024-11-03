@@ -15,6 +15,17 @@ namespace Api.Controllers
             _userService = userService;
         }
 
+        [HttpPost("users/login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        {
+            var user = await _userService.Authenticate(request.Email, request.Password);
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+            return Ok(user);
+        }
+
         [HttpPost("users")]
         public async Task<ActionResult<User>> CreateUser(User user)
         {
