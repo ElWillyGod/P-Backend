@@ -1,16 +1,24 @@
 ﻿using Core;
 using Core.Interfaces;
 using BCrypt.Net;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace Services
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IConfiguration _configuration;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(IUserRepository userRepository, IConfiguration configuration)
         {
             _userRepository = userRepository;
+            _configuration = configuration;
         }
 
         public async Task<User> CreateUser(User user)
@@ -41,13 +49,34 @@ namespace Services
 
         public async Task<User> Authenticate(string email, string password)
         {
-             var user = await _userRepository.GetUserByEmail(email);
+            var user = await _userRepository.GetUserByEmail(email);
             if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
-               return user;
+                return user;
             }
 
             return null;
+        }
+
+        public string GenerateJwtToken(User user)
+        {
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var cards = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                _configuration["Jwt:Issuer"],
+                _configuration["Jwt:Audience"],
+                claims,
+                expires: DateTime.Now.AddMinutes(30), // no se si sera bueno cerrar cada media hora
+                signingCredentials: cards
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
     }

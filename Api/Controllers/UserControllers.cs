@@ -1,6 +1,7 @@
 ﻿using Core;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Controllers
 {
@@ -16,6 +17,7 @@ namespace Api.Controllers
         }
 
         [HttpPost("users/login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var user = await _userService.Authenticate(request.Email, request.Password);
@@ -23,10 +25,12 @@ namespace Api.Controllers
             {
                 return Unauthorized();
             }
-            return Ok(user);
+            var token = _userService.GenerateJwtToken(user);
+            return Ok(new {token});
         }
 
         [HttpPost("users")]
+        [Authorize]
         public async Task<ActionResult<User>> CreateUser(User user)
         {
             var createdUser = await _userService.CreateUser(user);
@@ -40,6 +44,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("users/{id}")]
+        [Authorize]
         public async Task<ActionResult<User>> GetUserById(int id)
         {
             var user = await _userService.GetUserById(id);
@@ -51,6 +56,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("users/{id}")]
+        [Authorize]
         public async Task<IActionResult> UpdateUser(int id, User user)
         {
             if (id != user.Id)
@@ -71,6 +77,7 @@ namespace Api.Controllers
         }
 
         [HttpDelete("users/{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteUser(int id)
         {
             var user = await _userService.GetUserById(id);
