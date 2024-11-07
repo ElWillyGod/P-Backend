@@ -20,12 +20,11 @@ namespace Api.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var user = await _userService.Authenticate(request.Email, request.Password);
-            if (user == null)
+            var token = await _userService.Authenticate(request.Email, request.Password);
+            if (token == null)
             {
                 return Unauthorized();
             }
-            var token = _userService.GenerateJwtToken(user);
             return Ok(new {token});
         }
 
@@ -57,21 +56,15 @@ namespace Api.Controllers
 
         [HttpPut("users/{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateUser(int id, User user)
+        public async Task<IActionResult> UpdateUser(User user)
         {
-            if (id != user.Id)
-            {
-                return BadRequest();
-            }
 
-            var existingUser = await _userService.GetUserById(id);
 
-            if (existingUser is null)
+            if (!(await _userService.UpdateUser(user)))
             {
                 return NotFound();
             }
 
-            await _userService.UpdateUser(user);
 
             return NoContent();
         }
@@ -80,14 +73,10 @@ namespace Api.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            var user = await _userService.GetUserById(id);
-
-            if (user is null)
+            if(!(await _userService.DeleteUser(id)))
             {
                 return NotFound();
             }
-
-            await _userService.DeleteUser(id);
 
             return NoContent();
         }

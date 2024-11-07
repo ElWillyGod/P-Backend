@@ -1,11 +1,6 @@
 ﻿using Core;
 using Core.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Data
 {
@@ -36,6 +31,7 @@ namespace Data
             user.IsActive = false;
             _context.Entry(user).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+
             return true;
         }
 

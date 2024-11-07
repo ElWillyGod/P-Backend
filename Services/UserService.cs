@@ -29,6 +29,13 @@ namespace Services
 
         public async Task<bool> DeleteUser(int id)
         {
+            var user = await _userRepository.GetUserById(id);
+
+            if (user is null)
+            {
+                return false;
+            }
+
             return await _userRepository.DeleteUser(id);
         }
 
@@ -44,21 +51,27 @@ namespace Services
 
         public async Task<bool> UpdateUser(User user)
         {
+            if (await _userRepository.GetUserById(user.Id) == null)
+            {
+                return false;
+            }
+
+            user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
             return await _userRepository.UpdateUser(user);
         }
 
-        public async Task<User> Authenticate(string email, string password)
+        public async Task<String> Authenticate(string email, string password)
         {
             var user = await _userRepository.GetUserByEmail(email);
             if (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
-                return user;
+                return GenerateJwtToken(user);
             }
 
             return null;
         }
 
-        public string GenerateJwtToken(User user)
+        private string GenerateJwtToken(User user)
         {
             var claims = new[]
             {
