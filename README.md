@@ -42,6 +42,51 @@ El proyecto proporciona las siguientes funcionalidades CRUD para la gestión de 
 - **Actualizar Usuario**: Permite actualizar la información de un usuario existente.
 - **Eliminar Usuario**: Permite eliminar (desactivar) un usuario por su ID.
 
+## Endpoints de la API
+
+### Usuarios
+
+- **Crear Usuario**
+  - **URL**: `/api/users`
+  - **Método**: `POST`
+  - **Descripción**: Crea un nuevo usuario.
+  - **Cuerpo de la solicitud**:
+    ```json
+    {
+      "nombre": "string",
+      "email": "string",
+      "password": "string"
+    }
+    ```
+
+- **Leer Usuarios**
+  - **URL**: `/api/users`
+  - **Método**: `GET`
+  - **Descripción**: Obtiene la lista de todos los usuarios.
+
+- **Leer Usuario por ID**
+  - **URL**: `/api/users/{id}`
+  - **Método**: `GET`
+  - **Descripción**: Obtiene un usuario específico por su ID.
+
+- **Actualizar Usuario**
+  - **URL**: `/api/users/{id}`
+  - **Método**: `PUT`
+  - **Descripción**: Actualiza la información de un usuario existente.
+  - **Cuerpo de la solicitud**:
+    ```json
+    {
+      "nombre": "string",
+      "email": "string",
+      "password": "string"
+    }
+    ```
+
+- **Eliminar Usuario**
+  - **URL**: `/api/users/{id}`
+  - **Método**: `DELETE`
+  - **Descripción**: Elimina (desactiva) un usuario por su ID.
+
 ## Ejecución del Proyecto
 
 1. Clona el repositorio:
